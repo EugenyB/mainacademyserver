@@ -23,14 +23,28 @@ public class ClientThread extends Thread {
         this.main = main;
     }
 
+    public User getUser() {
+        return user;
+    }
+
     @Override
     public void run() {
         try(BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
             this.in = in; this.out = out;
             if (login()){
-                List<User> onlineUsers = main.getOnlineUsers();
-                sendList(onlineUsers.stream().filter(u->user.getFriendsIds().contains(u.getId())).collect(Collectors.toList()));
+                main.addToOnline(this);
+                List<User> onlineUsers;// = main.getOnlineUsers();
+                //sendList(onlineUsers.stream().filter(u->user.getFriendsIds().contains(u.getId())).collect(Collectors.toList()));
+                String message;
+                while ((message = in.readLine())!=null) {
+                    if ("<<<".equals(message)) {
+                        onlineUsers = main.getOnlineUsers();
+                        sendList(onlineUsers.stream().filter(u->user.getFriendsIds().contains(u.getId())).collect(Collectors.toList()));
+                    } else {
+                        main.processMessage(message);
+                    }
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -40,9 +54,11 @@ public class ClientThread extends Thread {
     }
 
     private void sendList(List<User> list) {
+        out.println("<<<");
         for (User u : list) {
-            out.println(u.getId()+";"+u.getUsername());
+            out.println(u.getId()+";"+u.getUsername()+";"+u.getLogin());
         }
+        out.println("<<<");
     }
 
     private boolean login() throws IOException {
@@ -71,6 +87,13 @@ public class ClientThread extends Thread {
 
     private boolean register(String line) throws IOException {
         //TODO реализовать регистрацию на основе строки line
-        return false;
+        User user = main.register(line);
+        if (user==null) return false;
+        this.user = user;
+        return true;
+    }
+
+    public void send(String sender, String text) {
+        out.println(">>>"+sender+">>>"+text);
     }
 }

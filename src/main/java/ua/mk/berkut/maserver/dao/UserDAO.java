@@ -14,7 +14,7 @@ public class UserDAO {
         this.connection = connection;
     }
 
-    public void addUser(User user) {
+    public User addUser(User user) {
         try (PreparedStatement ps = connection.prepareStatement("insert into chatuser (login, password, username, birthday, city, description) VALUES (?, ?, ?, ?, ?, ?)")) {
             ps.setString(1, user.getLogin());
             ps.setString(2, user.getPassword());
@@ -23,8 +23,10 @@ public class UserDAO {
             ps.setString(5, user.getCity());
             ps.setString(6, user.getDescription());
             ps.executeUpdate();
+            return user;
         } catch (SQLException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+            return null;
         }
     }
 
