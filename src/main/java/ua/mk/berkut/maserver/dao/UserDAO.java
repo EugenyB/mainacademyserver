@@ -76,19 +76,40 @@ public class UserDAO {
             ResultSet rs = ps.executeQuery();
             if (!rs.next()) return null;
             String login = rs.getString("login");
-            String password = rs.getString("password");
-            String username = rs.getString("username");
-            Date date = rs.getDate("birthday");
-            LocalDate birthday;
-            if (date!=null) {
-                birthday = date.toLocalDate();
-            } else {
-                birthday = LocalDate.of(1900, 1, 1);
-            }String city = rs.getString("city");
-            String description = rs.getString("description");
-            return new User(id,login,password,username,birthday,city,description);
+            return getUser(rs, id, login);
         } catch (SQLException e) {
             return null;
         }
+    }
+
+    public User findByLogin(String login) {
+        try (PreparedStatement ps = connection.prepareStatement("select * from chatuser where login = ?")) {
+            ps.setString(1, login);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                int id = rs.getInt("id");
+                return getUser(rs, id, login);
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private User getUser(ResultSet rs, int id, String login) throws SQLException {
+        String password = rs.getString("password");
+        String username = rs.getString("username");
+        Date date = rs.getDate("birthday");
+        LocalDate birthday;
+        if (date != null) {
+            birthday = date.toLocalDate();
+        } else {
+            birthday = LocalDate.of(1900, 1, 1);
+        }
+        String city = rs.getString("city");
+        String description = rs.getString("description");
+        return new User(id, login, password, username, birthday, city, description);
     }
 }

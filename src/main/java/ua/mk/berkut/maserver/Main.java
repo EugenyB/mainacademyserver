@@ -42,7 +42,7 @@ public class Main {
         ServerSocket serverSocket = new ServerSocket(
                 Integer.parseInt(properties.getProperty("port", "1234"))
         );
-        for (; ; ) {
+        for (;;) {
             Socket socket = serverSocket.accept();
             new ClientThread(socket, this).start();
         }
@@ -70,7 +70,7 @@ public class Main {
     public User findUser(String login, String password) {
         User user = userDAO.findUser(login, password);
         if (user != null) {
-            user.setFriendsIds(friendDAO.getFriedsFor(user.getId()));
+            user.setFriendsIds(friendDAO.getFriendsFor(user.getId()));
         }
         return user;
     }
@@ -115,5 +115,15 @@ public class Main {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public void processAddFriend(String line) {
+        String[] s = line.split(SEPARATOR);
+        if(s.length!=2) return;
+        String login1 = s[0];
+        String login2 = s[1];
+        User u1 = userDAO.findByLogin(login1);
+        User u2 = userDAO.findByLogin(login2);
+        friendDAO.addFriendFor(u1.getId(), u2.getId());
     }
 }

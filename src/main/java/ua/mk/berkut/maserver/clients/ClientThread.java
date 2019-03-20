@@ -38,9 +38,13 @@ public class ClientThread extends Thread {
                 //sendList(onlineUsers.stream().filter(u->user.getFriendsIds().contains(u.getId())).collect(Collectors.toList()));
                 String message;
                 while ((message = in.readLine())!=null) {
-                    if ("<<<".equals(message)) {
+                    if ("<<<".equals(message)) { // Show online friends
                         onlineUsers = main.getOnlineUsers();
                         sendList(onlineUsers.stream().filter(u->user.getFriendsIds().contains(u.getId())).collect(Collectors.toList()));
+                    } else if (message.startsWith("+++")) {
+                        main.processAddFriend(message.substring(3));
+                    } else if (">>>exit<<<".equals(message)) {
+                        break;
                     } else {
                         main.processMessage(message);
                     }
