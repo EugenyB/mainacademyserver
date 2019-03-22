@@ -101,7 +101,7 @@ public class Main {
 
     public User register(String line) {
         try {
-            String[] s = line.split(" ");
+            String[] s = line.split(";");
             String login = s[1];
             String password = s[2];
             String username = s[3];

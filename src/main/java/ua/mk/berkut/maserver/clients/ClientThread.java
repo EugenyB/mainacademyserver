@@ -53,6 +53,11 @@ public class ClientThread extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             main.remove(this);
         }
     }
@@ -71,17 +76,27 @@ public class ClientThread extends Thread {
         if (line.startsWith("register")) {
             return register(line);
         }
-        String[] s = line.split(" ");
+        String[] s = line.split(";");
         // s[0] - "login"
         // s[1] === login
         // s[2] === password
-        if (s.length!=3) return false;
-        if (!"login".equals(s[0])) return false;
+        if (s.length!=3) {
+            out.println("Login failed 1");
+            return false;
+        }
+        if (!"login".equals(s[0])) {
+            out.println("Login failed 2");
+            return false;
+        }
         String login = s[1];
         String password = s[2];
         User user = findUser(login, password);
-        if (user==null) return false;
+        if (user==null) {
+            out.println("Login failed 3");
+            return false;
+        }
         this.user = user;
+        out.println("Login Ok");
         return true;
     }
 
