@@ -35,7 +35,6 @@ public class ClientThread extends Thread {
             if (login()){
                 main.addToOnline(this);
                 List<User> onlineUsers;// = main.getOnlineUsers();
-                //sendList(onlineUsers.stream().filter(u->user.getFriendsIds().contains(u.getId())).collect(Collectors.toList()));
                 String message;
                 while ((message = in.readLine())!=null) {
                     if ("<<<".equals(message)) { // Show online friends
