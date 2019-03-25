@@ -11,22 +11,37 @@ import java.net.Socket;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Поток, взаимодействующий с коиентом. Для каждого клиента создается свой
+ */
 public class ClientThread extends Thread {
-    PrintWriter out;
-    BufferedReader in;
-    Socket socket;
-    Main main;
-    User user;
+    private PrintWriter out;
+    private BufferedReader in;
+    private Socket socket;
+    private Main main;
+    private User user;
 
+    /**
+     * Конструктор потока
+     * @param socket сокет для подключения
+     * @param main ссылка на объект главного класса сервера
+     */
     public ClientThread(Socket socket, Main main) {
         this.socket = socket;
         this.main = main;
     }
 
+    /**
+     * Получение пользователя, ассоциированного с потоком
+     * @return пользователя, ассоциированного с потоком
+     */
     public User getUser() {
         return user;
     }
 
+    /**
+     * Главный метод потока, в нем происходит "общение" клиента с сервером
+     */
     @Override
     public void run() {
         try(BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -61,6 +76,10 @@ public class ClientThread extends Thread {
         }
     }
 
+    /**
+     * Отправка списка клиентов подключенному пользователю
+     * @param list список, содержащий информацию о пользователях в формате: id;username;login
+     */
     private void sendList(List<User> list) {
         out.println("<<<");
         for (User u : list) {
@@ -69,6 +88,13 @@ public class ClientThread extends Thread {
         out.println("<<<");
     }
 
+    /**
+     * Обработка логина и пароля вновь подключившегося пользователя.
+     * Сначала отправляется признак подключения: {@code Server Ok}
+     * Затем, проверяются login-password и если подключение удалось, отправлем признак подключения: {@code Login Ok}
+     * @return true, если подключение успешно, и false - в противном случае
+     * @throws IOException если произошла ошибка при подключении
+     */
     private boolean login() throws IOException {
         out.println("Server Ok");
         String line = in.readLine();
@@ -99,18 +125,34 @@ public class ClientThread extends Thread {
         return true;
     }
 
-    private User findUser(String login, String password) {
+    /**
+     * Метод, делегирующий в Main поиск пользователя по логину и паролю
+     * @param login логин пользователя
+     * @param password пароль пользователя
+     * @return найденного пользователя
+     */
+    @SuppressWarnings("WeakerAccess")
+    public User findUser(String login, String password) {
         return main.findUser(login, password);
     }
 
-    private boolean register(String line) throws IOException {
-        //TODO реализовать регистрацию на основе строки line
+    /**
+     * Метод, делегирующий в Main регистрацию пользователя
+     * @param line строка регистрации
+     * @return true - если пользователь зарегистрировался успешно, false - в противном случае
+     */
+    private boolean register(String line) {
         User user = main.register(line);
         if (user==null) return false;
         this.user = user;
         return true;
     }
 
+    /**
+     * Отправка сообщения клиенту, ассоциированному с этим потоком
+     * @param sender от кого
+     * @param text текст сообщения
+     */
     public void send(String sender, String text) {
         out.println(">>>"+sender+">>>"+text);
     }

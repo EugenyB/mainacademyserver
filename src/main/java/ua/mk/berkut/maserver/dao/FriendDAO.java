@@ -14,7 +14,11 @@ public class FriendDAO {
         this.connection = connection;
     }
 
-
+    /**
+     * Находит по id пользователя получает множество id его друзей
+     * @param id id пользователя
+     * @return множество ид друзей пользователя, ид которого указан
+     */
     public Set<Integer> getFriendsFor(int id) {
         Set<Integer> result = new HashSet<>();
         try (PreparedStatement ps1 = connection.prepareStatement("select id2 from friend where id1 = ?");
@@ -40,11 +44,16 @@ public class FriendDAO {
         return result;
     }
 
+    /**
+     * Добавление дружбы
+     * @param from кто
+     * @param to с кем
+     */
     public void addFriendFor(int from, int to) {
         try (PreparedStatement preparedStatement = connection.prepareStatement("insert into friend (id1, id2) values (?, ?)")) {
             preparedStatement.setInt(1, from);
             preparedStatement.setInt(2, to);
-            int count = preparedStatement.executeUpdate();
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }

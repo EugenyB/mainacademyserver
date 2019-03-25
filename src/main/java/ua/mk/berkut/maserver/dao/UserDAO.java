@@ -7,13 +7,25 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Объект доступа к таблице chatuser
+ */
 public class UserDAO {
     private Connection connection;
 
+    /**
+     * Создает обхект доступа к данным на основе переданного, установленного ранее подключения
+     * @param connection подключение к БД, установленное ранее
+     */
     public UserDAO(Connection connection) {
         this.connection = connection;
     }
 
+    /**
+     * Добавляет нового пользователя в таблицу chatuser БД
+     * @param user объект, содержащий информацию о добавляемом пользователе
+     * @return добавленного пользователя, если успешно или null, в противном случае
+     */
     public User addUser(User user) {
         try (PreparedStatement ps = connection.prepareStatement("insert into chatuser (login, password, username, birthday, city, description) VALUES (?, ?, ?, ?, ?, ?)")) {
             ps.setString(1, user.getLogin());
@@ -30,6 +42,10 @@ public class UserDAO {
         }
     }
 
+    /**
+     * Получение списка всех пользователей
+     * @return список всех пользователей, записанных в таблице chatuser в БД
+     */
     public List<User> getAllUsers() {
         List<User> result = new ArrayList<>();
         try (Statement statement = connection.createStatement()) {
@@ -56,6 +72,12 @@ public class UserDAO {
         return result;
     }
 
+    /**
+     * Поиск пользователя по логину и паролю
+     * @param login логин пользователя
+     * @param password введенный пароль
+     * @return пользователя, если логин и пароль корректны и соответствуют друг другу
+     */
     public User findUser(String login, String password) {
         try (PreparedStatement ps = connection.prepareStatement("select `id`, `login`, `password` from chatuser where `login` = ?")) {
             ps.setString(1, login);
@@ -70,6 +92,12 @@ public class UserDAO {
         }
     }
 
+    /**
+     * Находит пользователя по id
+     * @param id идентификатор пользователя
+     * @return найденного пользователя или null, если пользователь с таким id не существует
+     */
+    @SuppressWarnings("WeakerAccess")
     public User find(int id) {
         try (PreparedStatement ps = connection.prepareStatement("select * from chatuser where id = ?")) {
             ps.setInt(1, id);
@@ -82,6 +110,11 @@ public class UserDAO {
         }
     }
 
+    /**
+     * Находит пользователя по логину
+     * @param login логин пользователя
+     * @return найденного пользователя или null, если пользователь с таким login не существует
+     */
     public User findByLogin(String login) {
         try (PreparedStatement ps = connection.prepareStatement("select * from chatuser where login = ?")) {
             ps.setString(1, login);
@@ -98,6 +131,14 @@ public class UserDAO {
         }
     }
 
+    /**
+     * Вспомогательный метод для извлечения пользователей из ResultSet
+     * @param rs ResultSet - результат запроса, из которого надо получить список пользователей
+     * @param id ид пользователя
+     * @param login логин пользователя
+     * @return пользователя по ид или логину
+     * @throws SQLException если случилась проблема с БД
+     */
     private User getUser(ResultSet rs, int id, String login) throws SQLException {
         String password = rs.getString("password");
         String username = rs.getString("username");
